@@ -1,0 +1,92 @@
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn import svm
+from sklearn.metrics import accuracy_score
+
+# Load the dataset
+df = pd.read_csv("diabetes.csv")
+
+# Display the first few rows
+print(df.head())
+
+# Check dataset dimensions
+print("Dataset shape:", df.shape)
+
+# Get statistical summary of dataset
+print(df.describe())
+
+# Check distribution of the target variable (Outcome)
+print("Outcome value counts:")
+print(df['Outcome'].value_counts())
+
+# Calculate mean values for each feature grouped by Outcome
+print(df.groupby('Outcome').mean())
+
+# Splitting dataset into features (X) and target variable (Y)
+X = df.drop(columns='Outcome', axis=1)
+Y = df['Outcome']
+
+print("Feature set (X):")
+print(X.head())
+print("Target variable (Y):")
+print(Y.head())
+
+# Standardize the feature data
+scaler = StandardScaler()
+scaler.fit(X)
+Standardized_data = scaler.transform(X)
+
+# Update X with standardized values
+X = Standardized_data
+
+# Verify the transformation
+print("Standardized feature set:")
+print(X[:5])
+
+# Splitting data into training and testing sets
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, stratify=Y, random_state=2)
+
+print("Data split:")
+print("Total samples:", X.shape)
+print("Training samples:", X_train.shape)
+print("Testing samples:", X_test.shape)
+
+# Training the SVM Model with Linear Kernel
+classifier = svm.SVC(kernel='linear')
+classifier.fit(X_train, Y_train)
+
+# Model Evaluation
+# Accuracy score on training data
+X_train_pred = classifier.predict(X_train)
+training_data_accuracy = accuracy_score(X_train_pred, Y_train)
+print("Accuracy score on training data:", training_data_accuracy)
+
+# Accuracy score on testing data
+X_test_pred = classifier.predict(X_test)
+testing_data_accuracy = accuracy_score(X_test_pred, Y_test)
+print("Accuracy score on test data:", testing_data_accuracy)
+
+# Making a prediction system
+input_data = (4, 110, 92, 0, 0, 37.6, 0.191, 30)
+
+# Convert input data to a numpy array
+input_data_numpyarray = np.asarray(input_data)
+
+# Reshape the array for a single prediction
+input_data_reshaped = input_data_numpyarray.reshape(1, -1)
+
+# Standardize the input data
+std_data = scaler.transform(input_data_reshaped)
+print("Standardized input data:", std_data)
+
+# Make prediction
+prediction = classifier.predict(std_data)
+print("Prediction result:", prediction)
+
+# Interpret the result
+if prediction[0] == 0:
+    print("Person is not Diabetic")
+else:
+    print("Person is Diabetic")
